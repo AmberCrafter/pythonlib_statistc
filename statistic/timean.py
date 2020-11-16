@@ -10,7 +10,7 @@ except:
     import os,sys,subprocess
     if os.name=='nt':
         subprocess.check_call([sys.executable, "-m", "pip", "install", "dateutil"])
-    elif os.name=='posix'
+    elif os.name=='posix':
         subprocess.check_call([sys.executable, "-m", "pip3", "install", "dateutil"])
     else:
         raise "Unknow platform, please install 'dateutil' by yourself."
@@ -24,7 +24,7 @@ except:
     import os,sys,subprocess
     if os.name=='nt':
         subprocess.check_call([sys.executable, "-m", "pip", "install", "numpy"])
-    elif os.name=='posix'
+    elif os.name=='posix':
         subprocess.check_call([sys.executable, "-m", "pip3", "install", "numpy"])
     else:
         raise "Unknow platform, please install 'numpy' by yourself."
@@ -170,6 +170,6 @@ class Timean(object):
     
     def get(self,parameter=None):
         if parameter==None: return dict(time=self.time, data=self.data, counts=self.counts)
-        if parameter=='time' return self.time
-        if parameter=='data' return self.data
-        if parameter=='counts' return self.counts
+        if parameter=='time': return self.time
+        if parameter=='data': return self.data
+        if parameter=='counts': return self.counts
