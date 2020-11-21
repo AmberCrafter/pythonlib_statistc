@@ -74,17 +74,17 @@
             - data
             - counts
             - None  -- need set config['asDict']=True
-    * isrepeat() -> bool
+    * isrepeat() -> bool<br>
         Check weather time repeat or not
-    * second()
+    * second()<br>
         Statistic method, depend on config setting.
-    * minute()
+    * minute()<br>
         Statistic method, depend on config setting.
-    * hour()
+    * hour()<br>
         Statistic method, depend on config setting.
-    * day()
+    * day()<br>
         Statistic method, depend on config setting.
-    * month()
+    * month()<br>
         Statistic method, depend on config setting.
-    * year()
+    * year()<br>
         Statistic method, depend on config setting.
