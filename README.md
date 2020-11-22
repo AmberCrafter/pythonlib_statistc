@@ -1,6 +1,4 @@
-# python_lib
-
-Getting Start
+# Getting Start
 ---
 install git library
 ```
