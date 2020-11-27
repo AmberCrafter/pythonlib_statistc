@@ -111,6 +111,12 @@
             - (0, 1]: is the data valid ratio threshold and depend on base value, the value is base*ratio
             - (1, ~): is the numbers of valid data threshold
         + base: the base of the ratio, default is 30
+    * season(ratio)<br>
+        Statistic method, depend on config setting.
+        + ratio: defined the valid data or not which depends on data number, default is None, which same as 0
+            - (0, 1]: is the data valid ratio threshold and depend on base value, the value is base*ratio
+            - (1, ~): is the numbers of valid data threshold
+        + base: the base of the ratio, default is 3
     * year(ratio)<br>
         Statistic method, depend on config setting.
         + ratio: defined the valid data or not which depends on data number, default is None, which same as 0
