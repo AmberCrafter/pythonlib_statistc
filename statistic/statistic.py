@@ -59,16 +59,18 @@ class Timean(object):
         return data
 
     @staticmethod
-    def _fixTime(time,data,timeStep:dict,zeroPara:dict,storageForward:bool):
+    def _fixTime(time,data,timeStep:dict,zeroPara:dict,storageForward:bool,starttime:datetime.datetime=None,endtime:datetime.datetime=None):
+    # def _fixTime(time,data,timeStep:dict,ratio:int,zeroPara:dict,storageForward:bool,starttime:datetime.datetime=None,endtime:datetime.datetime=None):
         '''
         zeroPara: set start datetime para
         '''
         dt = relativedelta(**timeStep)
         if not storageForward: time+=dt; time+=datetime.timedelta(microseconds=-1)
-        minTime = np.nanmin(time)
-        maxTime = np.nanmax(time)
+        minTime = np.nanmin(time) if starttime==None else starttime
+        maxTime = np.nanmax(time) if endtime==None else endtime
         maxTime+=dt
         if zeroPara!=None: minTime=minTime.replace(**zeroPara)
+        # if ratio==None: ratio=0
 
         dummy = []
         tummy = []
@@ -76,20 +78,23 @@ class Timean(object):
         while minTime<=maxTime:
             mask = np.where((time>=minTime) & (time<minTime+dt))[0]
             if mask.size==0: minTime+=dt; continue
-            dummy.append(np.nanmean(data[mask],axis=0))
             tummy.append(minTime)
             count.append(np.sum(np.isfinite(data[mask])))
+            dummy.append(np.nanmean(data[mask],axis=0))
+            # dummy.append(np.nanmean(data[mask],axis=0) if count[-1]>=ratio else np.array([np.nan]*len(data[0])))
             minTime+=dt
         return tummy,dummy,count
 
     @staticmethod
     def _nofixTime(time,data,parameter:str):
+    # def _nofixTime(time,data,parameter:str,ratio:int):
         '''
         parameter: set the datetime parameter (second, minute ...etc) will be used to calculate
         '''
         time_para_list = [eval(f"val.{parameter}") for val in time]
         minTime = np.nanmin(time_para_list)
         maxTime = np.nanmax(time_para_list)
+        # if ratio==None: ratio=0
 
         dummy = []
         tummy = []
@@ -97,9 +102,19 @@ class Timean(object):
         for i in range(minTime,maxTime+1):
             mask = np.where(eval(f"time.{parameter}")==i)[0]
             tummy.append(i)
-            dummy.append(np.nanmean(data[mask],axis=0))
             count.append(np.sum(np.isfinite(data[mask])))
+            dummy.append(np.nanmean(data[mask],axis=0))
+            # dummy.append(np.nanmean(data[mask],axis=0) if count[-1]>=ratio else np.array([np.nan]*len(data[0])))
         return tummy,dummy,count
+
+    @staticmethod
+    def _QC_numbers(data,count,threshold):
+        if threshold==None: return data
+        count = np.array(count)
+        data = np.array(data)
+        mask = np.where(count<threshold)[0]
+        data[mask,:]=np.nan
+        return data
 
     def set_config(self,init:bool=False,**kwargs):
         '''
@@ -117,15 +132,18 @@ class Timean(object):
             for key in kwargs.keys():
                 self.config[key] = kwargs[key]
 
-    def input(self,time,data,dtype=float,header=None):
+    def input(self,time,data,dtype=float,ratio=None,header=None,starttime:datetime.datetime=None,endtime:datetime.datetime=None):
         '''
         time <datetime> : input timelist of data
         data <numerical>: input data array
         '''
         self.time = np.array(time)
         self.data = np.array(data,dtype=dtype)
-        self.counts = []
+        self.ratio = ratio
         self.header = header
+        self.starttime = starttime
+        self.endtime = endtime
+        self.counts = []
         return "Successfully"
 
     def isrepeat(self):
@@ -137,16 +155,26 @@ class Timean(object):
         else:
             return True
 
-    def second(self):
+    def second(self,ratio=None,base=1000):
+        if ratio!=None:
+            ratio=int(base*ratio) if ratio<=1 else int(ratio)
+        else:
+            if self.ratio!=None:
+                ratio=int(base*self.ratio) if self.ratio<=1 else int(self.ratio)
+
         if self.config['fixTime']:
             if self.config['zeroStart']:
-                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(seconds=1),zeroPara=dict(microsecond=0)
-                    ,storageForward=self.config['storageForward'])
+                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(seconds=1),
+                    zeroPara=dict(microsecond=0),storageForward=self.config['storageForward'],
+                    starttime=self.starttime,endtime=self.endtime)
             else:
-                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(seconds=1))
+                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(seconds=1),
+                    starttime=self.starttime,endtime=self.endtime)
         else: # self.config['fixTime']==False
             tummy,dummy,count = self._nofixTime(self.time,self.data,parameter='second')
 
+        dummy = self._QC_numbers(dummy,count,ratio)
+
         if self.config['selfUpdate']:
             self.data = np.array(dummy)
             self.time = np.array(tummy)
@@ -160,16 +188,26 @@ class Timean(object):
             else:
                 return tummy,dummy,count
     
-    def minute(self):
+    def minute(self,ratio=None,base=60):
+        if ratio!=None:
+            ratio=int(base*ratio) if ratio<=1 else int(ratio)
+        else:
+            if self.ratio!=None:
+                ratio=int(base*self.ratio) if self.ratio<=1 else int(self.ratio)
+
         if self.config['fixTime']:
             if self.config['zeroStart']:
-                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(minutes=1),zeroPara=dict(second=0,microsecond=0)
-                    ,storageForward=self.config['storageForward'])
+                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(minutes=1),
+                    zeroPara=dict(second=0,microsecond=0),storageForward=self.config['storageForward'],
+                    starttime=self.starttime,endtime=self.endtime)
             else:
-                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(minutes=1))
+                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(minutes=1),
+                starttime=self.starttime,endtime=self.endtime)
         else: # self.config['fixTime']==False
             tummy,dummy,count = self._nofixTime(self.time,self.data,parameter='minute')
 
+        dummy = self._QC_numbers(dummy,count,ratio)
+
         if self.config['selfUpdate']:
             self.data = np.array(dummy)
             self.time = np.array(tummy)
@@ -183,16 +221,26 @@ class Timean(object):
             else:
                 return tummy,dummy,count
 
-    def hour(self):
+    def hour(self,ratio=None,base=60):
+        if ratio!=None:
+            ratio=int(base*ratio) if ratio<=1 else int(ratio)
+        else:
+            if self.ratio!=None:
+                ratio=int(base*self.ratio) if self.ratio<=1 else int(self.ratio)
+
         if self.config['fixTime']:
             if self.config['zeroStart']:
-                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(hours=1),zeroPara=dict(minute=0,second=0,microsecond=0)
-                    ,storageForward=self.config['storageForward'])
+                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(hours=1)
+                    ,zeroPara=dict(minute=0,second=0,microsecond=0),storageForward=self.config['storageForward'],
+                    starttime=self.starttime,endtime=self.endtime)
             else:
-                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(hours=1))
+                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(hours=1),
+                starttime=self.starttime,endtime=self.endtime)
         else: # self.config['fixTime']==False
             tummy,dummy,count = self._nofixTime(self.time,self.data,parameter='hour')
 
+        dummy = self._QC_numbers(dummy,count,ratio)
+
         if self.config['selfUpdate']:
             self.data = np.array(dummy)
             self.time = np.array(tummy)
@@ -206,39 +254,25 @@ class Timean(object):
             else:
                 return tummy,dummy,count
     
-    def day(self):
+    def day(self,ratio=None,base=24):
+        if ratio!=None:
+            ratio=int(base*ratio) if ratio<=1 else int(ratio)
+        else:
+            if self.ratio!=None:
+                ratio=int(base*self.ratio) if self.ratio<=1 else int(self.ratio)
+
         if self.config['fixTime']:
             if self.config['zeroStart']:
-                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(days=1),zeroPara=dict(hour=0,minute=0,second=0,microsecond=0)
-                    ,storageForward=self.config['storageForward'])
+                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(days=1),
+                    zeroPara=dict(hour=0,minute=0,second=0,microsecond=0),storageForward=self.config['storageForward'],
+                    starttime=self.starttime,endtime=self.endtime)
             else:
-                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(days=1))
+                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(days=1),
+                    starttime=self.starttime,endtime=self.endtime)
         else: # self.config['fixTime']==False
             tummy,dummy,count = self._nofixTime(self.time,self.data,parameter='day')
 
-        if self.config['selfUpdate']:
-            self.data = np.array(dummy)
-            self.time = np.array(tummy)
-            self.counts = np.array(count)
-        else:
-            print("This is not object standard operation!")
-            print("You need to set config[selfUpdate]=True and use get method to get the result.")
-            dummy = self._set_header(dummy)
-            if self.config['asDict']:
-                return dict(time=tummy,data=dummy,counts=count)
-            else:
-                return tummy,dummy,count
-    
-    def month(self):
-        if self.config['fixTime']:
-            if self.config['zeroStart']:
-                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(months=1),
-                    zeroPara=dict(day=1,hour=0,minute=0,second=0,microsecond=0)
-                    ,storageForward=self.config['storageForward'])
-            else:
-                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(months=1))
-        else: # self.config['fixTime']==False
-            tummy,dummy,count = self._nofixTime(self.time,self.data,parameter='month')
+        dummy = self._QC_numbers(dummy,count,ratio)
 
         if self.config['selfUpdate']:
             self.data = np.array(dummy)
@@ -253,16 +287,58 @@ class Timean(object):
             else:
                 return tummy,dummy,count
     
-    def year(self):
+    def month(self,ratio=None,base=30):
+        if ratio!=None:
+            ratio=int(base*ratio) if ratio<=1 else int(ratio)
+        else:
+            if self.ratio!=None:
+                ratio=int(base*self.ratio) if self.ratio<=1 else int(self.ratio)
+
+        if self.config['fixTime']:
+            if self.config['zeroStart']:
+                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(months=1),
+                    zeroPara=dict(day=1,hour=0,minute=0,second=0,microsecond=0),
+                    storageForward=self.config['storageForward'], starttime=self.starttime,endtime=self.endtime)
+            else:
+                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(months=1),
+                    starttime=self.starttime,endtime=self.endtime)
+        else: # self.config['fixTime']==False
+            tummy,dummy,count = self._nofixTime(self.time,self.data,parameter='month')
+
+        dummy = self._QC_numbers(dummy,count,ratio)
+
+        if self.config['selfUpdate']:
+            self.data = np.array(dummy)
+            self.time = np.array(tummy)
+            self.counts = np.array(count)
+        else:
+            print("This is not object standard operation!")
+            print("You need to set config[selfUpdate]=True and use get method to get the result.")
+            dummy = self._set_header(dummy)
+            if self.config['asDict']:
+                return dict(time=tummy,data=dummy,counts=count)
+            else:
+                return tummy,dummy,count
+    
+    def year(self,ratio=None,base=12):
+        if ratio!=None:
+            ratio=int(base*ratio) if ratio<=1 else int(ratio)
+        else:
+            if self.ratio!=None:
+                ratio=int(base*self.ratio) if self.ratio<=1 else int(self.ratio)
+
         if self.config['fixTime']:
             if self.config['zeroStart']:
                 tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(years=1),
-                    zeroPara=dict(month=1,day=1,hour=0,minute=0,second=0,microsecond=0)
-                    ,storageForward=self.config['storageForward'])
+                    zeroPara=dict(month=1,day=1,hour=0,minute=0,second=0,microsecond=0),storageForward=self.config['storageForward'],
+                    starttime=self.starttime,endtime=self.endtime)
             else:
-                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(years=1))
+                tummy,dummy,count = self._fixTime(self.time,self.data,timeStep=dict(years=1),
+                    starttime=self.starttime,endtime=self.endtime)
         else: # self.config['fixTime']==False
             tummy,dummy,count = self._nofixTime(self.time,self.data,parameter='year')
+
+        dummy = self._QC_numbers(dummy,count,ratio)
 
         if self.config['selfUpdate']:
             self.data = np.array(dummy)
@@ -298,7 +374,7 @@ if __name__ == "__main__":
     myobj.input(time,data,header=['a','b','c','d'])
 
     # Calculate and Get result
-    myobj.hour()
+    myobj.hour(1,500)
     myobj.set_config(asDict=True)
     result = myobj.get()
     print(result)

@@ -66,7 +66,12 @@
         + time: data time list
         + data: numerical data array
         + dtype: data type, use np.array(data,dtype=dtype) to regular data format, default is float
+        + ratio: defined the valid data or not which depends on data number, default is None, which same as 0
+            - (0, 1]: is the data valid ratio threshold
+            - (1, ~): is the numbers of valid data threshold
         + header: data header. If setted, output data will be formatted with header into dictionary, not control by config['asDict'], default is None
+        + starttime: processing starttime, default is time (first parameter) list minimum value.
+        + endtime: processing endtime, default is time (first parameter) list maximum value.
     * get(parameter)
         + parameter: select output parameter, default is None
             - config
@@ -76,15 +81,39 @@
             - None  -- need set config['asDict']=True
     * isrepeat() -> bool<br>
         Check weather time repeat or not
-    * second()<br>
+    * second(ratio)<br>
         Statistic method, depend on config setting.
-    * minute()<br>
+        + ratio: defined the valid data or not which depends on data number, default is None, which same as 0
+            - (0, 1]: is the data valid ratio threshold and depend on base value, the value is base*ratio
+            - (1, ~): is the numbers of valid data threshold
+        + base: the base of the ratio, default is 1000
+    * minute(ratio)<br>
         Statistic method, depend on config setting.
-    * hour()<br>
+        + ratio: defined the valid data or not which depends on data number, default is None, which same as 0
+            - (0, 1]: is the data valid ratio threshold and depend on base value, the value is base*ratio
+            - (1, ~): is the numbers of valid data threshold
+        + base: the base of the ratio, default is 60
+    * hour(ratio)<br>
         Statistic method, depend on config setting.
-    * day()<br>
+        + ratio: defined the valid data or not which depends on data number, default is None, which same as 0
+            - (0, 1]: is the data valid ratio threshold and depend on base value, the value is base*ratio
+            - (1, ~): is the numbers of valid data threshold
+        + base: the base of the ratio, default is 60
+    * day(ratio)<br>
         Statistic method, depend on config setting.
-    * month()<br>
+        + ratio: defined the valid data or not which depends on data number, default is None, which same as 0
+            - (0, 1]: is the data valid ratio threshold and depend on base value, the value is base*ratio
+            - (1, ~): is the numbers of valid data threshold
+        + base: the base of the ratio, default is 24
+    * month(ratio)<br>
         Statistic method, depend on config setting.
-    * year()<br>
+        + ratio: defined the valid data or not which depends on data number, default is None, which same as 0
+            - (0, 1]: is the data valid ratio threshold and depend on base value, the value is base*ratio
+            - (1, ~): is the numbers of valid data threshold
+        + base: the base of the ratio, default is 30
+    * year(ratio)<br>
         Statistic method, depend on config setting.
+        + ratio: defined the valid data or not which depends on data number, default is None, which same as 0
+            - (0, 1]: is the data valid ratio threshold and depend on base value, the value is base*ratio
+            - (1, ~): is the numbers of valid data threshold
+        + base: the base of the ratio, default is 12
