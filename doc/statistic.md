@@ -5,7 +5,7 @@
 >Date :     2020-11-21
 
 ---
-### Timean
+### Time
 >Structure: OOP
 
 * method
@@ -57,6 +57,7 @@
 |3      |fixTime        |bool       |True or False      |True           |Set statistic method<br>True: countiune with datetime<br>False: seperate by method|
 |4      |zeroStart      |bool       |True or False      |True           |Set start time point           |
 |5      |selfUpdate     |bool       |True or False      |True           |Set weather update self attributes |
+|6      |outputPara     |list       |'mean','std','max','min','maxTime','minTime'|'mean'|Set output parameter|
 
 3. mehtod and arguments
     * set_config(init,**kwargs)

@@ -15,3 +15,13 @@ def download_lib():
     import git
     git.Git('./lib/').clone('git@github.com:AmberCrafter/toolbox_meteo.git')
 ```
+
+---
+## ChangeLog
+[version 1.1.0]
+Update time: 2020-12-02
+1. append std, max, min, maxTime, minTime method
+2. change class name. Timean->Time
+3. change output data structure. data[haeder]->data[statistic][haeder]
+
+In this version, there still has some old data structure code, and weird data stucture.
