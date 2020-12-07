@@ -18,6 +18,11 @@ def download_lib():
 
 ---
 ## ChangeLog
+[version 1.1.1]
+Update time: 2020-12-29
+1. append quartile method
+feture: need to change the sequence data process method.
+
 [version 1.1.0]
 Update time: 2020-12-02
 1. append std, max, min, maxTime, minTime method
