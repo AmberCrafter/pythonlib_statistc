@@ -110,7 +110,12 @@ class Time(object):
             if zeroPara!=None: minTime=minTime.replace(**zeroPara)
             dummy={}
             for para in outputPara_list:
-                dummy[para]=[]
+                if para=='quartile':
+                    dummy['lower']=[]
+                    dummy['median']=[]
+                    dummy['upper']=[]
+                else:
+                    dummy[para]=[]
             tummy = []
             count = []
 
@@ -139,7 +144,12 @@ class Time(object):
 
             dummy = {}
             for para in outputPara_list:
-                dummy[para]=[]
+                if para=='quartile':
+                    dummy['lower']=[]
+                    dummy['median']=[]
+                    dummy['upper']=[]
+                else:
+                    dummy[para]=[]
             tummy = []
             count = []
             while minTime<=maxTime:
@@ -153,6 +163,10 @@ class Time(object):
                 if 'min' in outputPara_list: dummy['min'].append(np.nanmin(data[mask],axis=0))
                 if 'maxTime' in outputPara_list: dummy['maxTime'].append(time[mask][np.argmax(data[mask],axis=0)])
                 if 'maxTime' in outputPara_list: dummy['minTime'].append(time[mask][np.argmin(data[mask],axis=0)])
+                if 'quartile' in outputPara_list: dummy['lower'].append(np.nanpercentile(data[mask],25,axis=0))
+                if ('quartile' in outputPara_list) | ('median' in outputPara_list): 
+                    dummy['median'].append(np.nanpercentile(data[mask],50,axis=0))
+                if 'quartile' in outputPara_list: dummy['upper'].append(np.nanpercentile(data[mask],75,axis=0))
                 # dummy.append(np.nanmean(data[mask],axis=0) if count[-1]>=ratio else np.array([np.nan]*len(data[0])))
                 minTime+=dt
         dummy = Time._set_ndarray(dummy)
@@ -191,7 +205,12 @@ class Time(object):
 
         dummy = {}
         for para in outputPara_list:
-            dummy[para]=[]
+            if para=='quartile':
+                dummy['lower']=[]
+                dummy['median']=[]
+                dummy['upper']=[]
+            else:
+                dummy[para]=[]
         tummy = []
         count = []
         for i in range(minTime,maxTime+1):
@@ -204,10 +223,14 @@ class Time(object):
             if 'min' in outputPara_list: dummy['min'].append(np.nanmin(data[mask],axis=0))
             if 'maxTime' in outputPara_list: dummy['maxTime'].append(time[mask][np.argmax(data[mask],axis=0)])
             if 'maxTime' in outputPara_list: dummy['minTime'].append(time[mask][np.argmin(data[mask],axis=0)])
+            if 'quartile' in outputPara_list: dummy['lower'].append(np.nanpercentile(data[mask],25,axis=0))
+            if ('quartile' in outputPara_list) | ('median' in outputPara_list): 
+                dummy['median'].append(np.nanpercentile(data[mask],50,axis=0))
+            if 'quartile' in outputPara_list: dummy['upper'].append(np.nanpercentile(data[mask],75,axis=0))
             # dummy.append(np.nanmean(data[mask],axis=0) if count[-1]>=ratio else np.array([np.nan]*len(data[0])))
         dummy = Time._set_ndarray(dummy)
         return tummy,dummy,count
-    
+
     @staticmethod
     def _get_season(month):
         '''
@@ -240,7 +263,7 @@ class Time(object):
                 fixTime=True,
                 zeroStart=True,
                 selfUpdate=True,
-                outputPara_list=['mean'] # ['mean','std','max','min','maxTime','minTime'],
+                outputPara_list=['mean','std','mean'] # ['mean','std','max','min','maxTime','minTime','quartile','median'],
             )
         else:
             for key in kwargs.keys():
@@ -528,6 +551,7 @@ if __name__ == "__main__":
 
     # Calculate and Get result
     # myobj.hour(1,500)
+    myobj.set_config(outputPara_list=['mean','std','max','quartile'])
     myobj.season()
     myobj.set_config(asDict=True)
     result = myobj.get()
