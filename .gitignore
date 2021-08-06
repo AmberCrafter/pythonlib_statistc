@@ -1,4 +1,9 @@
 # python pre-compiler
 __pycache__
 
+# git stuff
 .git
+.gitignore
+
+# git push script
+git_push.ps1
