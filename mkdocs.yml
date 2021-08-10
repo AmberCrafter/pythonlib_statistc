@@ -1,0 +1,23 @@
+site_name: pythonlib_statistic
+
+theme:
+  name: "material"
+
+nav:
+  - index: index.md
+  - Timeseries: timeseries.md
+  - Retrival: retrieval.md
+
+extra_css:
+- css/style.css
+
+plugins:
+- search
+- mkdocstrings:
+    handlers:
+      python:
+        setup_commands:
+          - import sys
+          - sys.path.append("/docs/src")
+    watch:
+      - src

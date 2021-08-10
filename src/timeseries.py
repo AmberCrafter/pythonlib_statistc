@@ -31,13 +31,12 @@ except:
     import numpy as np
 # =================================================================== #
 import datetime
+from typing import Union
 
 class Time(object):
     '''
-    storageForward: True ->
-        storage value in starttime
-    storageForward: False ->
-        storage value in endtime
+    storageForward: True -> storage value in starttime <br>
+    storageForward: False -> storage value in endtime
     '''
 
     def __init__(self):
@@ -251,10 +250,34 @@ class Time(object):
         data[mask,:]=np.nan
         return data
 
-    def set_config(self,init:bool=False,**kwargs):
+    def set_config(self,init:bool=False,**kwargs) -> None:
         '''
-        config['storageForward']: save the value at the start time
+        config['storageForward']: save the value at the start time or not<br>
         config['outputPara_list]: select output parameter [mean,std,max,min]
+
+        Arguments:
+            init: Is the initialize status? Default is False
+                If set True, will using the init state.
+            **kwargs:
+                Optional, this work only init set false. 
+
+                    config: {
+                        asDict: bool,
+                        storage: bool,
+                        fixTime: bool,
+                        zeroStart: bool,
+                        selfUpdate: bool,
+                        outputPara_list: list = [
+                            mean,
+                            std,
+                            max,
+                            min,
+                            maxTime,
+                            minTime,
+                            quartile,
+                            median
+                        ]
+                    }
         '''
         if init==True:
             self.config = dict(
@@ -269,10 +292,23 @@ class Time(object):
             for key in kwargs.keys():
                 self.config[key] = kwargs[key]
 
-    def input(self,time,data,dtype=float,ratio=None,header=None,starttime:datetime.datetime=None,endtime:datetime.datetime=None):
+    def input(self,time: Union[list, np.ndarray],data: Union[list, np.ndarray],dtype:object =float,
+        ratio: Union[int, float]=None,header: list=None,starttime:datetime.datetime=None,endtime:datetime.datetime=None) -> str:
         '''
-        time <datetime> : input timelist of data
+        time <datetime> : input timelist of data <br>
         data <numerical>: input data array
+
+        Arguments:
+            time: list of time series
+            data: list of data set depend on time series
+            dtype: convert type of data elements
+            ratio: require of the data numbers(int) or ratio(float)
+            header: export tag of data header
+            starttime: start of the time
+            endtime: end of the time
+
+        Returns:
+            return 'Successfully' when process success.
         '''
         self.time = np.array(time)
         self.data = np.array(data,dtype=dtype)
@@ -283,16 +319,38 @@ class Time(object):
         self.counts = []
         return "Successfully"
 
-    def isrepeat(self):
+    def isrepeat(self) -> bool:
         '''
         Check weather data repeat depend on time.
+        Returns:
+            check there has repeat datetime in the data set.
         '''
         if len(self.time.reshape(-1))==len(set(self.time)):
             return False
         else:
             return True
 
-    def second(self,ratio=None,base=1000):
+    def second(self,ratio: Union[int, float]=None,base: int=1000) -> Union[None, tuple, list, dict]:
+        '''
+        Do statistic method base on config setting.
+
+        Arguments:
+            ratio: require of the data numbers(int) or ratio(float)
+            base: base number of required data, use on ratio<=1
+
+        Returns:
+            structure of return data
+            
+                None: if config.selfUpdate==True, then export data by self.get()
+                tuple or list: if config.selfUpdate==False & config.asDict==False, then return the data as tuple.
+                    ( time, data, count )
+                dict: if config.selfUpdate==False & config.asDict==True, then return the data as dictionary.
+                    {
+                        time: np.ndarray,
+                        data: np.ndarray,
+                        count: np.ndarray
+                    }
+        '''
         if ratio!=None:
             ratio=int(base*ratio) if ratio<=1 else int(ratio)
         else:
@@ -325,7 +383,27 @@ class Time(object):
             else:
                 return tummy,dummy,count
     
-    def minute(self,ratio=None,base=60):
+    def minute(self,ratio: Union[int, float]=None,base: int=60) -> Union[None, tuple, list, dict]:
+        '''
+        Do statistic method base on config setting.
+
+        Arguments:
+            ratio: require of the data numbers(int) or ratio(float)
+            base: base number of required data, use on ratio<=1
+
+        Returns:
+            structure of return data
+            
+                None: if config.selfUpdate==True, then export data by self.get()
+                tuple or list: if config.selfUpdate==False & config.asDict==False, then return the data as tuple.
+                    ( time, data, count )
+                dict: if config.selfUpdate==False & config.asDict==True, then return the data as dictionary.
+                    {
+                        time: np.ndarray,
+                        data: np.ndarray,
+                        count: np.ndarray
+                    }
+        '''
         if ratio!=None:
             ratio=int(base*ratio) if ratio<=1 else int(ratio)
         else:
@@ -358,7 +436,27 @@ class Time(object):
             else:
                 return tummy,dummy,count
 
-    def hour(self,ratio=None,base=60):
+    def hour(self,ratio: Union[int, float]=None,base: int=60) -> Union[None, tuple, list, dict]:
+        '''
+        Do statistic method base on config setting.
+
+        Arguments:
+            ratio: require of the data numbers(int) or ratio(float)
+            base: base number of required data, use on ratio<=1
+
+        Returns:
+            structure of return data
+            
+                None: if config.selfUpdate==True, then export data by self.get()
+                tuple or list: if config.selfUpdate==False & config.asDict==False, then return the data as tuple.
+                    ( time, data, count )
+                dict: if config.selfUpdate==False & config.asDict==True, then return the data as dictionary.
+                    {
+                        time: np.ndarray,
+                        data: np.ndarray,
+                        count: np.ndarray
+                    }
+        '''
         if ratio!=None:
             ratio=int(base*ratio) if ratio<=1 else int(ratio)
         else:
@@ -391,7 +489,27 @@ class Time(object):
             else:
                 return tummy,dummy,count
     
-    def day(self,ratio=None,base=24):
+    def day(self,ratio: Union[int, float]=None,base: int=24) -> Union[None, tuple, list, dict]:
+        '''
+        Do statistic method base on config setting.
+
+        Arguments:
+            ratio: require of the data numbers(int) or ratio(float)
+            base: base number of required data, use on ratio<=1
+
+        Returns:
+            structure of return data
+            
+                None: if config.selfUpdate==True, then export data by self.get()
+                tuple or list: if config.selfUpdate==False & config.asDict==False, then return the data as tuple.
+                    ( time, data, count )
+                dict: if config.selfUpdate==False & config.asDict==True, then return the data as dictionary.
+                    {
+                        time: np.ndarray,
+                        data: np.ndarray,
+                        count: np.ndarray
+                    }
+        '''
         if ratio!=None:
             ratio=int(base*ratio) if ratio<=1 else int(ratio)
         else:
@@ -424,7 +542,27 @@ class Time(object):
             else:
                 return tummy,dummy,count
     
-    def month(self,ratio=None,base=30):
+    def month(self,ratio: Union[int, float]=None,base: int=30) -> Union[None, tuple, list, dict]:
+        '''
+        Do statistic method base on config setting.
+
+        Arguments:
+            ratio: require of the data numbers(int) or ratio(float)
+            base: base number of required data, use on ratio<=1
+
+        Returns:
+            structure of return data
+            
+                None: if config.selfUpdate==True, then export data by self.get()
+                tuple or list: if config.selfUpdate==False & config.asDict==False, then return the data as tuple.
+                    ( time, data, count )
+                dict: if config.selfUpdate==False & config.asDict==True, then return the data as dictionary.
+                    {
+                        time: np.ndarray,
+                        data: np.ndarray,
+                        count: np.ndarray
+                    }
+        '''
         if ratio!=None:
             ratio=int(base*ratio) if ratio<=1 else int(ratio)
         else:
@@ -457,11 +595,31 @@ class Time(object):
             else:
                 return tummy,dummy,count
     
-    def season(self,ratio=None,base=3):
+    def season(self,ratio: Union[int, float]=None,base: int=3) -> Union[None, tuple, list, dict]:
         '''
-        Spring: March, April, May
-        Summer: June, July, August
-        Autumn: September, October, November 
+        Do statistic method base on config setting.
+
+        Arguments:
+            ratio: require of the data numbers(int) or ratio(float)
+            base: base number of required data, use on ratio<=1
+
+        Returns:
+            structure of return data
+            
+                None: if config.selfUpdate==True, then export data by self.get()
+                tuple or list: if config.selfUpdate==False & config.asDict==False, then return the data as tuple.
+                    ( time, data, count )
+                dict: if config.selfUpdate==False & config.asDict==True, then return the data as dictionary.
+                    {
+                        time: np.ndarray,
+                        data: np.ndarray,
+                        count: np.ndarray
+                    }
+        '''
+        '''
+        Spring: March, April, May <br>
+        Summer: June, July, August <br>
+        Autumn: September, October, November <br>
         Winter: December, January, February
         '''
         if ratio!=None:
@@ -496,7 +654,27 @@ class Time(object):
             else:
                 return tummy,dummy,count
 
-    def year(self,ratio=None,base=12):
+    def year(self,ratio:Union[int, float]=None,base:int=12) -> Union[None, tuple, list, dict]:
+        '''
+        Do statistic method base on config setting.
+
+        Arguments:
+            ratio: require of the data numbers(int) or ratio(float)
+            base: base number of required data, use on ratio<=1
+        
+        Returns:
+            structure of return data
+            
+                None: if config.selfUpdate==True, then export data by self.get()
+                tuple or list: if config.selfUpdate==False & config.asDict==False, then return the data as tuple.
+                    ( time, data, count )
+                dict: if config.selfUpdate==False & config.asDict==True, then return the data as dictionary.
+                    {
+                        time: np.ndarray,
+                        data: np.ndarray,
+                        count: np.ndarray
+                    }
+        '''
         if ratio!=None:
             ratio=int(base*ratio) if ratio<=1 else int(ratio)
         else:
@@ -529,7 +707,26 @@ class Time(object):
             else:
                 return tummy,dummy,count
     
-    def get(self,parameter=None):
+    def get(self,parameter: str=None) -> Union[list, dict, np.ndarray]:
+        '''
+        export the data from Time factory.
+
+        Arguments:
+            parameter: select the return parameter. 
+
+                enum:
+                    None: {
+                        time,
+                        data,
+                        counts
+                    },
+                    config,
+                    time,
+                    data,
+                    counts
+        Returns:
+            select parameter data set.
+        '''
         if parameter=='config': return self.config
         if (parameter==None) and (self.config['asDict']): return dict(time=self.time, data=Time._set_header(self.data,header=self.header), counts=self.counts)
         if parameter=='time': return self.time

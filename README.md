@@ -18,6 +18,10 @@ def download_lib():
 
 ---
 ## ChangeLog
+[version 1.1.2]
+Update time: 2021-08-07
+1. change file name: statistic -> timeseries
+
 [version 1.1.1]
 Update time: 2020-12-29
 1. append quartile method

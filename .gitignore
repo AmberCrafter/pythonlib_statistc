@@ -7,3 +7,6 @@ __pycache__
 
 # git push script
 git_push.ps1
+
+# site
+site/
