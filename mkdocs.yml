@@ -17,7 +17,8 @@ plugins:
     handlers:
       python:
         setup_commands:
-          - import sys
-          - sys.path.append("/docs/src")
+          - import os,sys
+          - WORKDIR = os.getcwd()
+          - sys.path.append(WORKDIR+"/src")
     watch:
       - src
